@@ -20,13 +20,21 @@ exports.getDashboardPenyedia = async (req, res) => {
     const [results] = await db.promise().query(sql, [id_penyedia, id_penyedia]);
     const row = results[0];
     
-      res.json({
-        jumlah_stok: row.jumlah_stok || 0,
-        telah_terdistribusi: row.telah_terdistribusi || 0,
+      res.status(200).json({
+        status:'success',
+        message:'Data dashboard berhasil diambil',
+        data:{
+          jumlah_stok: row.jumlah_stok || 0,
+          telah_terdistribusi: row.telah_terdistribusi || 0,
+        },
       });
   } catch(err){
-    res.status(500).json({message:"Gagal ambil data dashboard", error:err});
-  }
+      res.status(500).json({
+        status:"error",
+        message:"Gagal ambil data dashboard", 
+        error:err.message
+      });
+    }
 };
 
 exports.getTransaksiBansos = async(req, res) => {
@@ -42,10 +50,18 @@ exports.getTransaksiBansos = async(req, res) => {
     `;
     const [results] = await db.promise().query(sql, [id_penyedia]);
 
-    res.json(results);    
+    res.status(200).json({
+      status:'success',
+      message:'Riwayat berhasil diambil',
+      data:results
+    });    
   } catch(err){
-    res.status(500).json({message:"Gagal ambil riwayat", error:err});
-  }
+      res.status(500).json({
+        status:'success',
+        message:"Gagal ambil riwayat", 
+        error:err.message
+      });
+    }
 };
 
 exports.getDatabaseBansos = async(req, res) => {
@@ -60,10 +76,18 @@ exports.getDatabaseBansos = async(req, res) => {
     `;
     const [results] = await db.promise().query(sql, [id_penyedia]);
 
-    res.json(results);    
+    res.status(200).json({
+      status:'success',
+      message:'Data paket bansos berhasil diambil',
+      data:results,
+    });    
   } catch(err){
-    res.status(500).json({message:"Gagal ambil daftar paket", error:err});
-  }
+      res.status(500).json({
+        status:'success',
+        message:"Gagal ambil daftar paket", 
+        error:err.message
+      });
+    }
 };
 
 exports.deletePaket = async (req, res) => {
@@ -77,28 +101,50 @@ exports.deletePaket = async (req, res) => {
     const [results] = await db.promise().query(sql, [id_paket]);
 
     if (results.affectedRows === 0) {
-      return res.status(404).json({ message: 'Paket tidak ditemukan' });
+      return res.status(404).json({
+        status:'error',
+        message: 'Paket tidak ditemukan',
+      });
     }
-    res.json({ message: 'Paket berhasil dihapus (soft delete)' });
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus paket', error });
+
+    res.status(200).json({ 
+      status:'success',
+      message: 'Paket berhasil dihapus (soft delete)'
+    });
+  } catch (err) {
+      res.status(500).json({
+      status:'success',
+      message:"Gagal menghapus paket", 
+      error:err.message
+    });
   }
 };
 
 exports.addPaket = async (req, res) => {
   try {
-  const {nama_paket, stok, max_penghasilan, deskripsi} = req.body;
-  const id_penyedia = req.user.id_penyedia;
+    const {nama_paket, stok, max_penghasilan, deskripsi} = req.body;
+    const id_penyedia = req.user.id_penyedia;
 
-  const sql = `
-    INSERT INTO paket_bansos (nama_paket, stok, max_penghasilan, deskripsi, id_penyedia)
-    VALUES (?, ?, ?, ?, ?)
-  `; 
+    const sql = `
+      INSERT INTO paket_bansos (nama_paket, stok, max_penghasilan, deskripsi, id_penyedia)
+      VALUES (?, ?, ?, ?, ?)
+    `; 
 
-    await db.promise().query(sql, [nama_paket, stok, max_penghasilan, deskripsi, id_penyedia]);
-    res.json({ message: 'Paket berhasil ditambahkan' });
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal menambahkan paket', error });
+    const [results] = await db.promise().query(sql, [nama_paket, stok, max_penghasilan, deskripsi, id_penyedia]);
+
+    res.status(200).json({
+      data:'success',
+      message: 'Paket berhasil ditambahkan',
+      data:{
+        id_paket: results.insertId,
+      },
+    });
+  } catch (err) {
+      res.status(500).json({
+      status:'success',
+      message:"Gagal menambahkan paket", 
+      error:err.message
+    });
   }
 };
 
@@ -109,16 +155,27 @@ exports.editPaket = async (req, res) => {
   
   const sql = `
     UPDATE paket_bansos SET nama_paket = ?, stok = ?, deskripsi = ? 
-    WHERE id_paket = ? AND is_deleted = 0'
+    WHERE id_paket = ? AND is_deleted = 0
   `;
 
-  const [result] = await db.promise().query(sql, [nama_paket, stok, deskripsi, id_paket]);
+  const [results] = await db.promise().query(sql, [nama_paket, stok, deskripsi, id_paket]);
 
-  if (result.affectedRows === 0) {
-    return res.status(404).json({ message: 'Paket tidak ditemukan atau sudah dihapus' });
+  if (results.affectedRows === 0) {
+    return res.status(404).json({
+      status:'error',
+      message: 'Paket tidak ditemukan atau sudah dihapus',
+    });
   }
-  res.json({ message: 'Paket berhasil diperbarui' });
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui paket', error });
+
+  res.status(200).json({
+    status:'success',
+    message: 'Paket berhasil diperbarui'
+  });
+  } catch (err) {
+      res.status(500).json({
+      status:'success',
+      message:"Gagal memperbarui paket", 
+      error:err.message
+    });
   }
 };
