@@ -28,6 +28,13 @@ exports.registerPenerima = async (req,res) =>{
         });
     } catch (error) {
         console.error('Error:', error);
+
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Data tidak valid atau sudah terdaftar'
+            });
+        }
         res.status(500).json({
             status: 'error',
             message: 'Terjadi kesalahan server'
@@ -64,6 +71,14 @@ exports.registerPenyedia = async (req, res) =>{
     
     } catch (error) {
         console.error('Error:', error);
+        
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Data tidak valid atau sudah terdaftar'
+            });
+        }
+        
         res.status(500).json({
             status: 'error',
             message: 'Terjadi kesalahan server'

@@ -20,6 +20,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [isPenerima, setIsPenerima] = useState(true);
   const [isRegisterFailed, setRegisterFailed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -45,6 +46,7 @@ const handleSubmit = async (e) => {
     } else {
       const res = await response.json();
       console.error(res.message);
+      setErrorMessage(res.message);
       setRegisterFailed(true);
     }
   } catch (err) {
@@ -169,7 +171,7 @@ const handleSubmit = async (e) => {
                 Registrasi Gagal!
               </h2>
               <p className="mb-6">
-                Username telah digunakan, silakan coba username lain.
+                {errorMessage || "Terjadi kesalahan, silakan coba lagi."}
               </p>
               <button
                 onClick={() => setRegisterFailed(false)}

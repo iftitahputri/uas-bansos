@@ -7,6 +7,11 @@ exports.getDashboardPenerima = async (req, res) => {
   
     const sql = `
       SELECT
+        (SELECT username
+        FROM penerima
+        WHERE id_penerima = ?)
+        AS username,
+
         (SELECT COUNT(DISTINCT id_paket) 
         FROM paket_bansos
         WHERE is_deleted = 0) 
@@ -18,11 +23,11 @@ exports.getDashboardPenerima = async (req, res) => {
         ORDER BY last_pengambilan DESC
         LIMIT 1) AS tanggal_terakhir
     `;
-    const [results] = await db.promise().query(sql, [id_penerima]);
+    const [results] = await db.promise().query(sql, [id_penerima, id_penerima]);
     const row = results[0];
     let sisa_hari = null;
 
-    if (row.tanggal_terakhir) {
+    if(row.tanggal_terakhir) {
       const tanggal = new Date(row.tanggal_terakhir);
       tanggal.setDate(tanggal.getDate() + 30);
   
@@ -35,6 +40,7 @@ exports.getDashboardPenerima = async (req, res) => {
       status: 'success',
       message: 'Data dashboard berhasil diambil',
       data:{
+        username: row.username || 'Unkwon',
         tipe_bansos_tersedia: row.tipe_bansos_tersedia || 0,
         sisa_hari: sisa_hari !== null ? `${sisa_hari} hari lagi` : "Belum Ada"    
       }
@@ -113,7 +119,7 @@ exports.requestBansos = async(req, res) => {
     }
     
     const cek =`
-      SELECT last_pegambilan FROM  transaksi_bansos
+      SELECT last_pengambilan FROM  transaksi_bansos
       WHERE id_penerima = ? AND id_paket = ?
       ORDER BY last_pengambilan DESC LIMIT 1
       `;
