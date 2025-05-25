@@ -14,35 +14,25 @@ exports.getDashboardPenerima = async (req, res) => {
 
         (SELECT COUNT(DISTINCT id_paket) 
         FROM paket_bansos
-        WHERE is_deleted = 0) 
-        AS tipe_bansos_tersedia,
+        WHERE is_deleted = 0)
+        AS tipeBansos,
         
-        (SELECT next_pengambilan 
+        (SELECT DATEDIFF(next_pengambilan, last_pengambilan)
         FROM transaksi_bansos 
         WHERE id_penerima = ? 
         ORDER BY last_pengambilan DESC
-        LIMIT 1) AS tanggal_terakhir
+        LIMIT 1) AS sisaHari
     `;
     const [results] = await db.promise().query(sql, [id_penerima, id_penerima]);
     const row = results[0];
-    let sisa_hari = null;
-
-    if(row.tanggal_terakhir) {
-      const tanggal = new Date(row.tanggal_terakhir);
-      tanggal.setDate(tanggal.getDate() + 30);
-  
-      const hariIni = new Date();
-      const selisihWaktu = tanggal.getTime() - hariIni.getTime();
-      sisa_hari = Math.ceil(selisihWaktu / (1000 * 3600 * 24)); 
-    }
 
     res.status(200).json({
       status: 'success',
       message: 'Data dashboard berhasil diambil',
       data:{
         username: row.username || 'Unkwon',
-        tipe_bansos_tersedia: row.tipe_bansos_tersedia || 0,
-        sisa_hari: sisa_hari !== null ? `${sisa_hari} hari lagi` : "Belum Ada"    
+        tipeBansos: row.tipeBansos || 0,
+        sisaHari: row.sisaHari !== null ? `${row.sisaHari} hari lagi` : "Belum Ada"    
       }
     })
 

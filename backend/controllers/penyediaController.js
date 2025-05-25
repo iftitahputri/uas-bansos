@@ -6,26 +6,32 @@ exports.getDashboardPenyedia = async (req, res) => {
   
     const sql = `
       SELECT
+        (SELECT username
+          FROM penyedia
+          WHERE id_penyedia = ?)
+          AS username,
+
         (SELECT SUM(stok) 
           FROM paket_bansos
           WHERE id_penyedia = ? AND is_deleted = 0) 
-          AS jumlah_stok,
+          AS stokBansos,
   
         (SELECT COUNT(DISTINCT tb.id_transaksi)
           FROM transaksi_bansos tb
           JOIN paket_bansos pb ON tb.id_paket = pb.id_paket
           WHERE pb.id_penyedia = ? AND is_deleted = 0) 
-          AS telah_terdistribusi;
+          AS terdistribusi;
       `;
-    const [results] = await db.promise().query(sql, [id_penyedia, id_penyedia]);
+    const [results] = await db.promise().query(sql, [id_penyedia, id_penyedia, id_penyedia]);
     const row = results[0];
     
       res.status(200).json({
         status:'success',
         message:'Data dashboard berhasil diambil',
         data:{
-          jumlah_stok: row.jumlah_stok || 0,
-          telah_terdistribusi: row.telah_terdistribusi || 0,
+          username: row.username || 'Unkwon',      
+          stokBansos: row.stokBansos || 0,
+          terdistribusi: row.terdistribusi || 0,
         },
       });
   } catch(err){
@@ -147,7 +153,7 @@ exports.addPaket = async (req, res) => {
     });
   }
 };
-
+ 
 exports.editPaket = async (req, res) => {
   try {
   const {id_paket} = req.params;

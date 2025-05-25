@@ -5,8 +5,10 @@ import { LogOut, Box, Timer, Info, X, Search, Plus, Check } from "lucide-react";
 import profile from "../propil.jpeg";
 import axios from "axios";
 
-
 export default function DashPenerima() {
+  const [username, setUsername] = useState("");
+  const [tipeBansos, setTipeBansos] = useState([]);
+  const [sisaHari, setSisaHari] = useState([]);
   const [isRiwayat, setIsRiwayat] = useState(false);
   const [isDetail, setIsDetail] = useState(false);
   const [statusKlaim, setStatusKlaim] = useState(null);
@@ -15,72 +17,46 @@ export default function DashPenerima() {
   const [selectedItem, setSelectedItem] = useState(null);
 
 useEffect(() => {
-  axios.get("http://localhost:3000/api/paket")
-    .then((res) => {
-      console.log("ISI PAKET:", res.data);
-      // Ubah ini sesuai bentuk datamu:
-      setDataStok(res.data.data || res.data); // fallback kalau langsung array
-    })
-    .catch((err) => {
-      console.error("Error fetching paket:", err);
-    });
+  const token = localStorage.getItem("token");
+  axios.get("http://localhost:5000/penerima/dashboard", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then(res => {
+    setUsername(res.data.data.username);
+    setTipeBansos(res.data.data.tipeBansos);
+    setSisaHari(res.data.data.sisaHari);
+  })
+  .catch(err => console.error("Gagal mengambil username:", err));
+}, []);
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  axios.get("http://localhost:5000/penerima/daftar", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then(res => {
+    setDataStok(res.data.data); 
+  })
+  .catch(err => console.error("Gagal mengambil username:", err));
 }, []);
 
   useEffect(() => {
-    const dummyDataRiwayat = [
-      {
-        id_transaksi: 789,
-        id_paket: 123,
-        nama_paket: "ayam",
-        tanggal_penyaluran: "kemaren",
-        pengambilan_selanjutnya: "besok",
+    const token = localStorage.getItem("token");
+    axios.get("http://localhost:5000/penerima/riwayat", {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-      {
-        id_transaksi: 790,
-        id_paket: 101,
-        nama_paket: "Beras 5kg",
-        tanggal_penyaluran: "2025-05-20",
-        pengambilan_selanjutnya: "2025-06-20",
-      },
-      {
-        id_transaksi: 791,
-        id_paket: 102,
-        nama_paket: "Minyak Goreng 2L",
-        tanggal_penyaluran: "2025-05-19",
-        pengambilan_selanjutnya: "2025-06-19",
-      },
-      {
-        id_transaksi: 792,
-        id_paket: 103,
-        nama_paket: "Telur 1 Kg",
-        tanggal_penyaluran: "2025-05-18",
-        pengambilan_selanjutnya: "2025-06-18",
-      },
-      {
-        id_transaksi: 793,
-        id_paket: 104,
-        nama_paket: "Gula 1 Kg",
-        tanggal_penyaluran: "2025-05-17",
-        pengambilan_selanjutnya: "2025-06-17",
-      },
-      {
-        id_transaksi: 794,
-        id_paket: 105,
-        nama_paket: "Susu Kental Manis",
-        tanggal_penyaluran: "2025-05-16",
-        pengambilan_selanjutnya: "2025-06-16",
-      },
-      {
-        id_transaksi: 795,
-        id_paket: 106,
-        nama_paket: "Mie Instan 10 pcs",
-        tanggal_penyaluran: "2025-05-15",
-        pengambilan_selanjutnya: "2025-06-15",
-      },
-    ];
-    setDataRiwayat(dummyDataRiwayat);
+    })
+    .then(res => {
+      setDataRiwayat(res.data.data);
+    })
+    .catch(err => console.error("Gagal mengambil username:", err));
   }, []);
-
+      
   const [searchTermStok, setSearchTermStok] = useState("");
   const [searchTermRiwayat, setSearchTermRiwayat] = useState("");
 
@@ -114,7 +90,7 @@ useEffect(() => {
                   className="bg-cover rounded-full h-[40px] w-[40px] "
                   style={{ backgroundImage: `url(${profile})` }}
                 ></div>
-                <div className="font-semibold">Username Penerima</div>
+                <div className="font-semibold">{username}</div>
               </div>
 
               <div className="mr-10">
@@ -136,7 +112,7 @@ useEffect(() => {
                   className="w-[50px] h-[50px] p-1 bg-green-500 rounded-full "
                 />
                 <div>
-                  <h1 className="text-2xl font-bold">27 </h1>
+                  <h1 className="text-2xl font-bold">{tipeBansos} </h1>
                   <h3 className="text-sm text-gray-700 text-nowrap">
                     Tipe Bansos Tersedia
                   </h3>
@@ -152,7 +128,7 @@ useEffect(() => {
                 className="w-[50px] h-[50px] p-1 bg-yellow-500 rounded-full "
               />
               <div>
-                <div className="text-2xl font-bold">22 hari lagi</div>
+                <div className="text-2xl font-bold">{sisaHari}</div>
                 <div className="text-sm text-gray-700">
                   Perkiraan bantuan selanjutnya
                 </div>
@@ -244,9 +220,9 @@ useEffect(() => {
                             const memenuhiSyarat = true;
 
                             if (memenuhiSyarat) {
-                              setStatusKlaim("berhasil");
+                              setStatusKlaim("Berhasil");
                             } else {
-                              setStatusKlaim("gagal");
+                              setStatusKlaim("Gagal");
                             }
                           }}
                         />
@@ -375,9 +351,9 @@ useEffect(() => {
                       <td className="py-3 px-3">{item.id_transaksi}</td>
                       <td className="py-3 px-3">{item.id_paket}</td>
                       <td className="py-3 px-3">{item.nama_paket}</td>
-                      <td className="py-3 px-3">{item.tanggal_penyaluran}</td>
+                      <td className="py-3 px-3">{item.last_pengambilan}</td>
                       <td className="py-3 px-3">
-                        {item.pengambilan_selanjutnya}
+                        {item.next_pengambilan}
                       </td>
                     </tr>
                   ))}

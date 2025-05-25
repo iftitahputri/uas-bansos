@@ -14,6 +14,7 @@ import {
   Search,
 } from "lucide-react";
 import profile from "../propil.jpeg";
+import axios from "axios";
 
 export default function DashPenyedia() {
   useEffect(() => {
@@ -22,6 +23,9 @@ export default function DashPenyedia() {
     });
   }, []);
 
+  const [username, setUsername] = useState("");
+  const [stokBansos, setStokBansos] = useState([]);
+  const [terdistribusi, setTerdistribusi] = useState([]);
   const [isRiwayat, setIsRiwayat] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [isTambah, setIsTambah] = useState(false);
@@ -29,96 +33,47 @@ export default function DashPenyedia() {
   const [dataRiwayat, setDataRiwayat] = useState([]);
   const [overlayMessage, setOverlayMessage] = useState("");
   const [overlayType, setOverlayType] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  axios.get("http://localhost:5000/penyedia/dashboard", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then(res => {
+    setUsername(res.data.data.username);
+    setStokBansos(res.data.data.stokBansos);
+    setTerdistribusi(res.data.data.terdistribusi);
+  })
+  .catch(err => console.error("Gagal mengambil data:", err));
+}, []);
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  axios.get("http://localhost:5000/penyedia/daftar", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then(res => {
+    setDataStok(res.data.data); 
+  })
+  .catch(err => console.error("Gagal mengambil username:", err));
+}, []);
 
   useEffect(() => {
-    const dummyDataDatabase = [
-      {
-        id_paket: 101,
-        nama_paket: "Beras 5kg",
-        stok: 20,
-        terakhir_diperbaharui: "2 hari lalu",
+    const token = localStorage.getItem("token");
+    axios.get("http://localhost:5000/penyedia/riwayat", {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-      {
-        id_paket: 102,
-        nama_paket: "Minyak Goreng 2L",
-        stok: 15,
-        terakhir_diperbaharui: "kemarin",
-      },
-      {
-        id_paket: 103,
-        nama_paket: "Telur 1kg",
-        stok: 30,
-        terakhir_diperbaharui: "hari ini",
-      },
-      {
-        id_paket: 104,
-        nama_paket: "Gula 1kg",
-        stok: 10,
-        terakhir_diperbaharui: "3 hari lalu",
-      },
-      {
-        id_paket: 105,
-        nama_paket: "Mie Instan 10 bungkus",
-        stok: 25,
-        terakhir_diperbaharui: "seminggu lalu",
-      },
-    ];
-    setDataStok(dummyDataDatabase);
-  }, []);
-
-  useEffect(() => {
-    const dummyDataRiwayat = [
-      {
-        id_transaksi: 101,
-        id_penerima: 201,
-        id_paket: 301,
-        tanggal_penyaluran: "2025-05-20",
-        pengambilan_selanjutnya: "2025-06-20",
-      },
-      {
-        id_transaksi: 102,
-        id_penerima: 202,
-        id_paket: 302,
-        tanggal_penyaluran: "2025-05-19",
-        pengambilan_selanjutnya: "2025-06-19",
-      },
-      {
-        id_transaksi: 103,
-        id_penerima: 203,
-        id_paket: 303,
-        tanggal_penyaluran: "2025-05-18",
-        pengambilan_selanjutnya: "2025-06-18",
-      },
-      {
-        id_transaksi: 104,
-        id_penerima: 204,
-        id_paket: 304,
-        tanggal_penyaluran: "2025-05-17",
-        pengambilan_selanjutnya: "2025-06-17",
-      },
-      {
-        id_transaksi: 105,
-        id_penerima: 205,
-        id_paket: 305,
-        tanggal_penyaluran: "2025-05-16",
-        pengambilan_selanjutnya: "2025-06-16",
-      },
-      {
-        id_transaksi: 106,
-        id_penerima: 206,
-        id_paket: 306,
-        tanggal_penyaluran: "kemarin",
-        pengambilan_selanjutnya: "besok",
-      },
-      {
-        id_transaksi: 107,
-        id_penerima: 207,
-        id_paket: 307,
-        tanggal_penyaluran: "hari ini",
-        pengambilan_selanjutnya: "minggu depan",
-      },
-    ];
-    setDataRiwayat(dummyDataRiwayat);
+    })
+    .then(res => {
+      setDataRiwayat(res.data.data);
+    })
+    .catch(err => console.error("Gagal mengambil username:", err));
   }, []);
 
   const showOverlay = (message, type) => {
@@ -177,7 +132,7 @@ export default function DashPenyedia() {
                   className="bg-cover rounded-full h-[40px] w-[40px] "
                   style={{ backgroundImage: `url(${profile})` }}
                 ></div>
-                <div className="font-semibold">Username Penyedia</div>
+                <div className="font-semibold">{username}</div>
               </div>
 
               <div className="mr-10">
@@ -197,7 +152,7 @@ export default function DashPenyedia() {
               className="w-[40px] h-[40px] p-2 bg-green-500 rounded-full "
             />
             <div className="flex flex-col ">
-              <h1 className="text-2xl font-bold">10</h1>
+              <h1 className="text-2xl font-bold">{stokBansos}</h1>
               <h3 className="text-sm text-gray-700">Jumlah Stok Bansos</h3>
             </div>
           </div>
@@ -207,7 +162,7 @@ export default function DashPenyedia() {
               className="w-[40px] h-[40px] p-2 bg-indigo-500 rounded-full "
             />
             <div className="flex flex-col ">
-              <h1 className="text-2xl font-bold">10</h1>
+              <h1 className="text-2xl font-bold">{terdistribusi}</h1>
               <h3 className="text-sm text-gray-700">
                 Paket Bansos Telah Terdistribusi
               </h3>
