@@ -33,47 +33,49 @@ export default function DashPenyedia() {
   const [dataRiwayat, setDataRiwayat] = useState([]);
   const [overlayMessage, setOverlayMessage] = useState("");
   const [overlayType, setOverlayType] = useState("");
-  const [selectedItem, setSelectedItem] = useState(null);
-
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  axios.get("http://localhost:5000/penyedia/dashboard", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  .then(res => {
-    setUsername(res.data.data.username);
-    setStokBansos(res.data.data.stokBansos);
-    setTerdistribusi(res.data.data.terdistribusi);
-  })
-  .catch(err => console.error("Gagal mengambil data:", err));
-}, []);
-
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  axios.get("http://localhost:5000/penyedia/daftar", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  .then(res => {
-    setDataStok(res.data.data); 
-  })
-  .catch(err => console.error("Gagal mengambil username:", err));
-}, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    axios.get("http://localhost:5000/penyedia/riwayat", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then(res => {
-      setDataRiwayat(res.data.data);
-    })
-    .catch(err => console.error("Gagal mengambil username:", err));
+    axios
+      .get("http://localhost:5000/penyedia/dashboard", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setUsername(res.data.data.username);
+        setStokBansos(res.data.data.stokBansos);
+        setTerdistribusi(res.data.data.terdistribusi);
+      })
+      .catch((err) => console.error("Gagal mengambil data:", err));
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    axios
+      .get("http://localhost:5000/penyedia/daftar", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setDataStok(res.data.data);
+      })
+      .catch((err) => console.error("Gagal mengambil username:", err));
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    axios
+      .get("http://localhost:5000/penyedia/riwayat", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setDataRiwayat(res.data.data);
+      })
+      .catch((err) => console.error("Gagal mengambil username:", err));
   }, []);
 
   const showOverlay = (message, type) => {
@@ -99,119 +101,133 @@ useEffect(() => {
   //   }
   // };
 
+  const handleHapus = (id_paket) => {
+    const token = localStorage.getItem("token");
 
-const handleHapus = (id_paket) => {
-  const token = localStorage.getItem("token");
-
-  axios
-    .delete(`http://localhost:5000/penyedia/delete/${id_paket}`, {
+    axios
+      .delete(`http://localhost:5000/penyedia/delete/${id_paket}`, {
         headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      showOverlay("Paket berhasil dihapus", "success");
-      const updated = dataStok.filter((item) => item.id_paket !== id_paket);
-      setDataStok(updated);
-    })
-    .catch ((error) => {
-    console.error("Gagal hapus paket:", error);
-    showOverlay("Gagal menghapus paket, coba lagi nanti", "error");
-    });
-  
-};
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        showOverlay("Paket berhasil dihapus", "success");
+        const updated = dataStok.filter((item) => item.id_paket !== id_paket);
+        setDataStok(updated);
+      })
+      .catch((error) => {
+        console.error("Gagal hapus paket:", error);
+        showOverlay("Gagal menghapus paket, coba lagi nanti", "error");
+      });
+  };
 
   const [formTambah, setFormTambah] = useState({
-  nama_paket: "",
-  stok: "",
-  max_penghasilan: "",
-  deskripsi: "",
-});
+    nama_paket: "",
+    stok: "",
+    max_penghasilan: "",
+    deskripsi: "",
+  });
 
-const handleSubmitTambah = (e) => {
-  e.preventDefault();
-  const token = localStorage.getItem("token");
+  const handleSubmitTambah = (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
 
-  axios
-    .post("http://localhost:5000/penyedia/add", formTambah, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      showOverlay("Paket berhasil ditambahkan", "success");
-      setIsTambah(false);
-      // Update daftar lokal:
-      setDataStok([...dataStok, res.data.data]);
-      setFormTambah({
-        nama_paket: "",
-        stok: "",
-        max_penghasilan: "",
-        deskripsi: "",
+    axios
+      .post("http://localhost:5000/penyedia/add", formTambah, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        showOverlay("Paket berhasil ditambahkan", "success");
+        setIsTambah(false);
+        // Update daftar lokal:
+        setDataStok([...dataStok, res.data.data]);
+        setFormTambah({
+          nama_paket: "",
+          stok: "",
+          max_penghasilan: "",
+          deskripsi: "",
+        });
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      })
+      .catch((err) => {
+        showOverlay("Gagal menambahkan paket", "error");
+        console.error("Tambah paket gagal:", err);
       });
-    })
-    .catch((err) => {
-      showOverlay("Gagal menambahkan paket", "error");
-      console.error("Tambah paket gagal:", err);
-    });
-};
+  };
 
   const [formEdit, setFormEdit] = useState({
-  id_paket: "",
-  nama_paket: "",
-  stok: "",
-  deskripsi: "",
-});
-
-const handleEditClick = (item) => {
-  setFormEdit({
-    id_paket: item.id_paket,
-    nama_paket: item.nama_paket,
-    stok: item.stok,
-    deskripsi: item.deskripsi,
+    id_paket: "",
+    nama_paket: "",
+    stok: "",
+    deskripsi: "",
   });
-  setIsEdit(true);
-};
 
-const handleSubmitEdit = (e) => {
-  e.preventDefault();
-  const token = localStorage.getItem("token");
-
-  axios
-    .put(`http://localhost:5000/penyedia/edit/${formEdit.id_paket}`, formEdit, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      showOverlay("Paket berhasil diperbarui", "success");
-      setIsEdit(false);
-
-      const updated = dataStok.map((item) =>
-        item.id_paket === formEdit.id_paket ? res.data.data : item
-      );
-      setDataStok(updated);
-    })
-    .catch((err) => {
-      showOverlay("Gagal mengedit paket", "error");
-      console.error("Edit paket gagal:", err);
+  const handleEditClick = (item) => {
+    setFormEdit({
+      id_paket: item.id_paket,
+      nama_paket: item.nama_paket,
+      stok: item.stok,
+      deskripsi: item.deskripsi,
     });
-};
+    setIsEdit(true);
+  };
+
+  const handleSubmitEdit = (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    axios
+      .put(
+        `http://localhost:5000/penyedia/edit/${formEdit.id_paket}`,
+        formEdit,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        showOverlay("Paket berhasil diperbarui", "success");
+        setIsEdit(false);
+
+        const updated = dataStok.map((item) =>
+          item.id_paket === formEdit.id_paket ? res.data.data : item
+        );
+        setDataStok(updated);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      })
+      .catch((err) => {
+        showOverlay("Gagal mengedit paket", "error");
+        console.error("Edit paket gagal:", err);
+      });
+  };
 
   const [searchTermStok, setSearchTermStok] = useState("");
   const [searchTermRiwayat, setSearchTermRiwayat] = useState("");
 
   const filteredData = isRiwayat
-    ? dataRiwayat.filter((item) =>
-        Object.values(item).some((value) =>
-          String(value).toLowerCase().includes(searchTermRiwayat.toLowerCase())
+    ? (dataRiwayat || [])
+        .filter((item) => item != null)
+        .filter((item) =>
+          Object.values(item).some((value) =>
+            String(value)
+              .toLowerCase()
+              .includes(searchTermRiwayat.toLowerCase())
+          )
         )
-      )
-    : dataStok.filter((item) =>
-        Object.values(item).some((value) =>
-          String(value).toLowerCase().includes(searchTermStok.toLowerCase())
-        )
-      );
+    : (dataStok || [])
+        .filter((item) => item != null)
+        .filter((item) =>
+          Object.values(item).some((value) =>
+            String(value).toLowerCase().includes(searchTermStok.toLowerCase())
+          )
+        );
 
   return (
     <div className="h-[100vh] bg-linear-to-t from-indigo-100 to-indigo-300">
@@ -327,7 +343,10 @@ const handleSubmitEdit = (e) => {
               <div className="bg-linear-to-t from-white via-white to-indigo-100 w-[50vw] h-[65vh] rounded-2xl p-5 text-black">
                 <h1 className="text-xl font-bold text-black">Tambah Paket</h1>
                 <div className="flex mt-1 bg-indigo-700 w-[46.8vw] h-[5px] rounded-2xl"></div>
-                <form className="flex flex-col flex-wrap" onSubmit={handleSubmitTambah}>
+                <form
+                  className="flex flex-col flex-wrap"
+                  onSubmit={handleSubmitTambah}
+                >
                   <input
                     type="text"
                     name="nama_paket"
@@ -335,7 +354,10 @@ const handleSubmitEdit = (e) => {
                     required
                     value={formTambah.nama_paket}
                     onChange={(e) =>
-                      setFormTambah({ ...formTambah, nama_paket: e.target.value })
+                      setFormTambah({
+                        ...formTambah,
+                        nama_paket: e.target.value,
+                      })
                     }
                     className="mt-8 pr-5 pl-3 py-2 rounded-xl"
                     style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.18)" }}
@@ -347,8 +369,8 @@ const handleSubmitEdit = (e) => {
                       placeholder="Stok"
                       required
                       value={formTambah.stok}
-                      onChange={(e) => 
-                        setFormTambah ({ ...formTambah, stok: e.target.value})
+                      onChange={(e) =>
+                        setFormTambah({ ...formTambah, stok: e.target.value })
                       }
                       className="flex-1 mt-2 pr-5 pl-3 py-2 rounded-xl"
                       style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.18)" }}
@@ -360,7 +382,10 @@ const handleSubmitEdit = (e) => {
                       required
                       value={formTambah.max_penghasilan}
                       onChange={(e) =>
-                        setFormTambah({ ...formTambah, max_penghasilan: e.target.value })
+                        setFormTambah({
+                          ...formTambah,
+                          max_penghasilan: e.target.value,
+                        })
                       }
                       className="flex-1 mt-2 pr-5 pl-3 py-2 rounded-xl"
                       style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.18)" }}
@@ -373,7 +398,10 @@ const handleSubmitEdit = (e) => {
                     required
                     value={formTambah.deskripsi}
                     onChange={(e) =>
-                      setFormTambah({ ...formTambah, deskripsi: e.target.value })
+                      setFormTambah({
+                        ...formTambah,
+                        deskripsi: e.target.value,
+                      })
                     }
                     className="mt-2 pr-5 pl-3 pt-2 pb-20 text-wrap rounded-xl resize-none"
                     style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.18)" }}
@@ -435,9 +463,7 @@ const handleSubmitEdit = (e) => {
                       <td className="py-3 px-3">{item.id_paket}</td>
                       <td className="py-3 px-3">{item.nama_paket}</td>
                       <td className="py-3 px-3">{item.stok}</td>
-                      <td className="py-3 px-3">
-                        {item.terakhir_diperbarui}
-                      </td>
+                      <td className="py-3 px-3">{item.terakhir_diperbarui}</td>
                       <td className="py-3 px-3 flex gap-2">
                         <button
                           type="button"
@@ -473,13 +499,18 @@ const handleSubmitEdit = (e) => {
               <div className="bg-linear-to-t from-white via-white to-indigo-100 w-[25vw] h-[65vh] rounded-2xl p-5 text-black">
                 <h1 className="text-xl font-bold text-black">Edit Paket</h1>
                 <div className="flex mt-1 bg-indigo-700 w-[22vw] h-[5px] rounded-2xl"></div>
-                <form className="flex flex-col flex-wrap">
+                <form
+                  className="flex flex-col flex-wrap"
+                  onSubmit={handleSubmitEdit}
+                >
                   <input
                     type="text"
                     name="nama_paket"
                     placeholder="Nama Paket"
                     value={formEdit.nama_paket}
-                    onChange={(e) => setFormEdit({ ...formEdit, nama_paket: e.target.value })}
+                    onChange={(e) =>
+                      setFormEdit({ ...formEdit, nama_paket: e.target.value })
+                    }
                     required
                     className="mt-8 pr-5 pl-3 py-2 rounded-xl"
                     style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.18)" }}
@@ -489,7 +520,9 @@ const handleSubmitEdit = (e) => {
                     name="stok"
                     placeholder="Stok"
                     value={formEdit.stok}
-                    onChange={(e) => setFormEdit({ ...formEdit, stok: e.target.value })}
+                    onChange={(e) =>
+                      setFormEdit({ ...formEdit, stok: e.target.value })
+                    }
                     required
                     className="mt-2 pr-5 pl-3 py-2 rounded-xl"
                     style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.18)" }}
@@ -499,7 +532,9 @@ const handleSubmitEdit = (e) => {
                     name="deskripsi"
                     placeholder="Deskripsi"
                     value={formEdit.deskripsi}
-                    onChange={(e) => setFormEdit({ ...formEdit, deskripsi: e.target.value })}
+                    onChange={(e) =>
+                      setFormEdit({ ...formEdit, deskripsi: e.target.value })
+                    }
                     required
                     className="mt-2 pr-5 pl-3 pt-2 pb-20 text-wrap rounded-xl resize-none"
                     style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.18)" }}
@@ -524,7 +559,7 @@ const handleSubmitEdit = (e) => {
             <div className="text-center" onClick={(e) => e.stopPropagation()}>
               <div
                 className={`bg-white w-[25vw] ${
-                  overlayType === "success" ? "h-[150vh]" : "h-[50vh]"
+                  overlayType === "success" ? "h-[50vh]" : "h-[50vh]"
                 } rounded-2xl p-5 text-black`}
               >
                 <div
@@ -592,9 +627,7 @@ const handleSubmitEdit = (e) => {
                       <td className="py-3 px-3">{item.id_penerima}</td>
                       <td className="py-3 px-3">{item.id_paket}</td>
                       <td className="py-3 px-3">{item.last_pengambilan}</td>
-                      <td className="py-3 px-3">
-                        {item.next_pengambilan}
-                      </td>
+                      <td className="py-3 px-3">{item.next_pengambilan}</td>
                     </tr>
                   ))}
                 </tbody>

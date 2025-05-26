@@ -10,7 +10,6 @@ export default function DashPenerima() {
   const [tipeBansos, setTipeBansos] = useState(0);
   const [sisaHari, setSisaHari] = useState(0);
   const [isRiwayat, setIsRiwayat] = useState(false);
-  const [isDetail, setIsDetail] = useState(false);
   const [statusKlaim, setStatusKlaim] = useState(null);
   const [dataStok, setDataStok] = useState([]);
   const [dataRiwayat, setDataRiwayat] = useState([]);
