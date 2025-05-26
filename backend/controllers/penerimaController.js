@@ -127,12 +127,12 @@ exports.requestBansos = async(req, res) => {
 
     const stokPaket= `SELECT stok
       FROM paket_bansos
-      id_paket = ?
+      WHERE id_paket = ?
       `;
 
     const [cekStok] = await db.promise().query(stokPaket, [id_paket]);
 
-      if (cekStok[0].stok < 0) {
+      if (cekStok[0].stok <= 0) {
       return res.status(403).json({
         status: 'error',
         message: `Stok tidak cukup`
@@ -164,7 +164,7 @@ exports.requestBansos = async(req, res) => {
       if (now < next_pengambilan) {
         return res.status(400).json({
           status: 'error',
-          message: "Kamu sudah request paket ini dalam 30 hari terakhir"
+          message: "Kamu sudah request paket dalam 30 hari terakhir"
         });
       }
     }
@@ -183,7 +183,7 @@ exports.requestBansos = async(req, res) => {
 
     res.status(201).json({
       status: 'success',
-      message: "Berhasil klaim bansos"
+      message: "Anda telah berhasil mengklaim bantuan sosial."
     });
   } catch(err) {
     res.status(500).json({

@@ -14,6 +14,7 @@ export default function DashPenerima() {
   const [dataStok, setDataStok] = useState([]);
   const [dataRiwayat, setDataRiwayat] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [statusMessage, setStatusMessage] = useState("");
 
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -78,12 +79,19 @@ useEffect(() => {
         )
       );
       setStatusKlaim("berhasil");
+      setStatusMessage(res.data.message || "Klaim berhasil.");
     } else {
       setStatusKlaim("gagal");
+      setStatusMessage(res.data.message || "Klaim gagal.");
     }
   } catch (error) {
     console.error("Klaim gagal:", error);
     setStatusKlaim("gagal");
+    if (error.response && error.response.data && error.response.data.message) {
+      setStatusMessage(error.response.data.message);
+    } else {
+      setStatusMessage("Terjadi kesalahan saat klaim.");
+    }    
   }
 };
       
@@ -276,7 +284,7 @@ useEffect(() => {
                     Pengambilan Berhasil
                   </h1>
                   <p className="mt-2 text-sm text-gray-600">
-                    Anda telah berhasil mengklaim bantuan sosial.
+                    {statusMessage}
                   </p>
                 </>
               ) : (
@@ -289,7 +297,7 @@ useEffect(() => {
                     Pengambilan Gagal
                   </h1>
                   <p className="mt-2 text-sm text-gray-600">
-                    Anda tidak memenuhi syarat untuk mengambil bantuan ini.
+                    {statusMessage}
                   </p>
                 </>
               )}
