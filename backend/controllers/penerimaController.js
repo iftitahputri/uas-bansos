@@ -134,19 +134,19 @@ exports.requestBansos = async(req, res) => {
       });
     }
 
-    const cek =`
-      SELECT last_pengambilan FROM  transaksi_bansos
-      WHERE id_penerima = ? AND id_paket = ?
+    const cek = `
+      SELECT last_pengambilan, DATE_ADD(last_pengambilan, INTERVAL 30 DAY) AS boleh_ambil
+      FROM transaksi_bansos
+      WHERE id_penerima = ?
       ORDER BY last_pengambilan DESC LIMIT 1
       `;
-      
-    const [transaksiTerakhir] = await db.promise().query(cek, [id_penerima, id_paket]);
+
+    const [transaksiTerakhir] = await db.promise().query(cek, [id_penerima]);
       
     if (transaksiTerakhir.length > 0) {
-      const lastDate = new Date(transaksiTerakhir[0].last_pengambilan);
+      const nextDate = new Date(transaksiTerakhir[0].boleh_ambil);
       const now = new Date();
-      const diffDays = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
-      if (diffDays < 30) {
+      if (now < nextDate) {
         return res.status(400).json({
           status: 'error',
           message: "Kamu sudah request paket ini dalam 30 hari terakhir"

@@ -332,7 +332,7 @@ useEffect(() => {
                     <label className="font-semibold">
                       Maksimum Penghasilan:{" "}
                     </label>
-                    {selectedItem.maksimum_penghasilan}
+                    {selectedItem.max_penghasilan}
                   </div>
                   <div className="px-2 mt-3 py-1">
                     <label className="font-semibold">Stok: </label>
