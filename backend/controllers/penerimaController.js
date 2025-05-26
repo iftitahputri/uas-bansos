@@ -30,7 +30,7 @@ exports.getDashboardPenerima = async (req, res) => {
       status: 'success',
       message: 'Data dashboard berhasil diambil',
       data:{
-        username: row.username || 'Unkwon',
+        username: row.username || 'Unknwon',
         tipeBansos: row.tipeBansos || 0,
         sisaHari: row.sisaHari !== null ? `${row.sisaHari} hari lagi` : "Belum Ada"    
       }
@@ -101,13 +101,39 @@ exports.requestBansos = async(req, res) => {
     const {id_paket} = req.body;
     const id_penerima = req.user.id_penerima;
 
-    if (!id_paket) {
+    if (!id_paket || isNaN(id_paket)) {
       return res.status(400).json({
         status:'error',
-        message: "id_paket tidak boleh kosong"
+        message: "id_paket tidak valid"
       });
     }
-    
+
+    const [dataPenerima] = await db.promise().query(
+      'SELECT gaji FROM penerima WHERE id_penerima = ?',
+      [id_penerima]
+    );
+    const [dataPaket] = await db.promise().query(
+      'SELECT max_penghasilan FROM paket_bansos WHERE id_paket = ?',
+      [id_paket]
+    );
+
+    if (dataPenerima.length === 0 || dataPaket.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Data penerima atau paket tidak ditemukan'
+      });
+    }
+
+    const gaji = dataPenerima[0].gaji;
+    const maksGaji = dataPaket[0].max_penghasilan;
+
+    if (gaji > maksGaji) {
+      return res.status(403).json({
+        status: 'error',
+        message: `Gaji kamu (${gaji}) melebihi batas maksimal (${maksGaji}) untuk paket ini`
+      });
+    }
+
     const cek =`
       SELECT last_pengambilan FROM  transaksi_bansos
       WHERE id_penerima = ? AND id_paket = ?
@@ -135,14 +161,19 @@ exports.requestBansos = async(req, res) => {
 
     await db.promise().query(sql, [id_penerima, id_paket]);
 
+    await db.promise().query(
+      'UPDATE paket_bansos SET stok = stok - 1 WHERE id_paket = ?',
+      [id_paket]
+    );
+
     res.status(201).json({
       status: 'success',
-      message: "Berhasil request bansos"
+      message: "Berhasil klaim bansos"
     });
   } catch(err) {
     res.status(500).json({
       status:'error',
-      message:"Gagal request bansos", 
+      message:"Gagal klaim bansos", 
       error:err.message
     });
   }

@@ -7,8 +7,8 @@ import axios from "axios";
 
 export default function DashPenerima() {
   const [username, setUsername] = useState("");
-  const [tipeBansos, setTipeBansos] = useState([]);
-  const [sisaHari, setSisaHari] = useState([]);
+  const [tipeBansos, setTipeBansos] = useState(0);
+  const [sisaHari, setSisaHari] = useState(0);
   const [isRiwayat, setIsRiwayat] = useState(false);
   const [isDetail, setIsDetail] = useState(false);
   const [statusKlaim, setStatusKlaim] = useState(null);
@@ -56,6 +56,37 @@ useEffect(() => {
     })
     .catch(err => console.error("Gagal mengambil username:", err));
   }, []);
+
+  const handleKlaimBansos = async (id_paket) => {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/penerima/request",
+      { id_paket },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (res.data.status === "success") {
+        setDataStok((prevData) =>
+          prevData.map((item) =>
+          item.id_paket === id_paket
+            ? { ...item, stok: item.stok - 1 }
+            : item
+        )
+      );
+      setStatusKlaim("berhasil");
+    } else {
+      setStatusKlaim("gagal");
+    }
+  } catch (error) {
+    console.error("Klaim gagal:", error);
+    setStatusKlaim("gagal");
+  }
+};
       
   const [searchTermStok, setSearchTermStok] = useState("");
   const [searchTermRiwayat, setSearchTermRiwayat] = useState("");
@@ -200,7 +231,7 @@ useEffect(() => {
                     >
                       <td className="py-3 px-3">{item.id_paket}</td>
                       <td className="py-3 px-3">{item.nama_paket}</td>
-                      <td className="py-3 px-3">{item.maksimum_penghasilan}</td>
+                      <td className="py-3 px-3">{item.max_penghasilan}</td>
                       <td className="py-3 px-3">{item.stok}</td>
                       <td className="py-3 px-3 flex gap-2">
                         <button
@@ -216,15 +247,7 @@ useEffect(() => {
                         <Plus
                           size={16}
                           className="w-[30px] h-[30px] bg-green-600 text-white p-1 rounded-md hover:scale-95 transition-scale duration-300 hover:bg-green-400 ease-in-out"
-                          onClick={() => {
-                            const memenuhiSyarat = true;
-
-                            if (memenuhiSyarat) {
-                              setStatusKlaim("Berhasil");
-                            } else {
-                              setStatusKlaim("Gagal");
-                            }
-                          }}
+                          onClick={() => handleKlaimBansos(item.id_paket)}
                         />
                       </td>
                     </tr>

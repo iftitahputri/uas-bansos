@@ -19,7 +19,7 @@ exports.getDashboardPenyedia = async (req, res) => {
         (SELECT COUNT(DISTINCT tb.id_transaksi)
           FROM transaksi_bansos tb
           JOIN paket_bansos pb ON tb.id_paket = pb.id_paket
-          WHERE pb.id_penyedia = ? AND is_deleted = 0) 
+          WHERE pb.id_penyedia = ?) 
           AS terdistribusi;
       `;
     const [results] = await db.promise().query(sql, [id_penyedia, id_penyedia, id_penyedia]);
