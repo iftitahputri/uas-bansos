@@ -124,8 +124,8 @@ exports.requestBansos = async(req, res) => {
       });
     }
 
-    const gaji = dataPenerima[0].gaji;
-    const maksGaji = dataPaket[0].max_penghasilan;
+    const gaji = Number(dataPenerima[0].penghasilan);
+    const maksGaji = Number(dataPaket[0].max_penghasilan);
 
     if (gaji > maksGaji) {
       return res.status(403).json({

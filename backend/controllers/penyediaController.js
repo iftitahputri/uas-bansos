@@ -77,7 +77,7 @@ exports.getDatabaseBansos = async(req, res) => {
     const sql = `
       SELECT id_paket, nama_paket, stok,  DATE_FORMAT(terakhir_diperbarui, '%d/%m/%Y %H:%i') AS terakhir_diperbarui
       FROM paket_bansos
-      WHERE id_penyedia = ? AND is_deleted = 0 AND stok != 0
+      WHERE id_penyedia = ? AND is_deleted = 0
       ORDER BY id_paket ASC
     `;
     const [results] = await db.promise().query(sql, [id_penyedia]);
