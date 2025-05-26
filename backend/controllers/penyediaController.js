@@ -29,7 +29,7 @@ exports.getDashboardPenyedia = async (req, res) => {
         status:'success',
         message:'Data dashboard berhasil diambil',
         data:{
-          username: row.username || 'Unkwon',      
+          username: row.username || 'Unknwon',      
           stokBansos: row.stokBansos || 0,
           terdistribusi: row.terdistribusi || 0,
         },
@@ -48,7 +48,8 @@ exports.getTransaksiBansos = async(req, res) => {
     const id_penyedia = req.user.id_penyedia;
   
     const sql = `
-      SELECT tb.id_transaksi, tb.id_penerima, tb.id_paket, DATE_FORMAT(tb.last_pengambilan, '%d/%m/%Y %H:%i') AS last_pengambilan, DATE_FORMAT(tb.next_pengambilan, '%d/%m/%Y %H:%i') AS next_pengambilan
+      SELECT tb.id_transaksi, tb.id_penerima, tb.id_paket, DATE_FORMAT(tb.last_pengambilan, '%d/%m/%Y %H:%i') AS last_pengambilan, 
+      DATE_FORMAT(tb.next_pengambilan, '%d/%m/%Y %H:%i') AS next_pengambilan
       FROM transaksi_bansos tb
       JOIN paket_bansos pb ON tb.id_paket = pb.id_paket
       WHERE pb.id_penyedia = ? AND is_deleted = 0

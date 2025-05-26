@@ -74,7 +74,8 @@ exports.getRiwayatBansos = async(req, res) => {
   try{
     const id_penerima = req.user.id_penerima;
     const sql = `
-      SELECT t.id_transaksi, t.id_paket, pb.nama_paket, DATE_FORMAT(t.last_pengambilan, '%d/%m/%Y %H:%i') AS last_pengambilan, DATE_FORMAT(t.next_pengambilan, '%d/%m/%Y %H:%i') AS next_pengambilan
+      SELECT t.id_transaksi, t.id_paket, pb.nama_paket, DATE_FORMAT(t.last_pengambilan, '%d/%m/%Y %H:%i') 
+      AS last_pengambilan, DATE_FORMAT(t.next_pengambilan, '%d/%m/%Y %H:%i') AS next_pengambilan
       FROM transaksi_bansos t
       JOIN paket_bansos pb ON t.id_paket = pb.id_paket
       WHERE t.id_penerima = ? AND pb.is_deleted = 0
@@ -121,6 +122,20 @@ exports.requestBansos = async(req, res) => {
       return res.status(404).json({
         status: 'error',
         message: 'Data penerima atau paket tidak ditemukan'
+      });
+    }
+
+    const stokPaket= `SELECT stok
+      FROM paket_bansos
+      id_paket = ?
+      `;
+
+    const [cekStok] = await db.promise().query(stokPaket, [id_paket]);
+
+      if (cekStok[0].stok < 0) {
+      return res.status(403).json({
+        status: 'error',
+        message: `Stok tidak cukup`
       });
     }
 
