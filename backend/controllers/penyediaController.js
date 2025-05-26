@@ -48,7 +48,7 @@ exports.getTransaksiBansos = async(req, res) => {
     const id_penyedia = req.user.id_penyedia;
   
     const sql = `
-      SELECT tb.id_transaksi, tb.id_penerima, tb.id_paket, tb.last_pengambilan, tb.next_pengambilan
+      SELECT tb.id_transaksi, tb.id_penerima, tb.id_paket, DATE_FORMAT(tb.last_pengambilan, '%d/%m/%Y %H:%i') AS last_pengambilan, DATE_FORMAT(tb.next_pengambilan, '%d/%m/%Y %H:%i') AS next_pengambilan
       FROM transaksi_bansos tb
       JOIN paket_bansos pb ON tb.id_paket = pb.id_paket
       WHERE pb.id_penyedia = ? AND is_deleted = 0
@@ -75,7 +75,7 @@ exports.getDatabaseBansos = async(req, res) => {
     const id_penyedia = req.user.id_penyedia;
   
     const sql = `
-      SELECT id_paket, nama_paket, stok, terakhir_diperbarui 
+      SELECT id_paket, nama_paket, stok,  DATE_FORMAT(terakhir_diperbarui, '%d/%m/%Y %H:%i') AS terakhir_diperbarui
       FROM paket_bansos
       WHERE id_penyedia = ? AND is_deleted = 0 AND stok != 0
       ORDER BY id_paket ASC

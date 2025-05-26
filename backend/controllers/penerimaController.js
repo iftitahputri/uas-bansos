@@ -30,7 +30,7 @@ exports.getDashboardPenerima = async (req, res) => {
       status: 'success',
       message: 'Data dashboard berhasil diambil',
       data:{
-        username: row.username || 'Unknwon',
+        username: row.username || 'Unknown',
         tipeBansos: row.tipeBansos || 0,
         sisaHari: row.sisaHari !== null ? `${row.sisaHari} hari lagi` : "Belum Ada"    
       }
@@ -74,7 +74,7 @@ exports.getRiwayatBansos = async(req, res) => {
   try{
     const id_penerima = req.user.id_penerima;
     const sql = `
-      SELECT t.id_transaksi, t.id_paket, pb.nama_paket, t.last_pengambilan, t.next_pengambilan
+      SELECT t.id_transaksi, t.id_paket, pb.nama_paket, DATE_FORMAT(t.last_pengambilan, '%d/%m/%Y %H:%i') AS last_pengambilan, DATE_FORMAT(t.next_pengambilan, '%d/%m/%Y %H:%i') AS next_pengambilan
       FROM transaksi_bansos t
       JOIN paket_bansos pb ON t.id_paket = pb.id_paket
       WHERE t.id_penerima = ? AND pb.is_deleted = 0
@@ -109,7 +109,7 @@ exports.requestBansos = async(req, res) => {
     }
 
     const [dataPenerima] = await db.promise().query(
-      'SELECT gaji FROM penerima WHERE id_penerima = ?',
+      'SELECT penghasilan FROM penerima WHERE id_penerima = ?',
       [id_penerima]
     );
     const [dataPaket] = await db.promise().query(
@@ -156,7 +156,7 @@ exports.requestBansos = async(req, res) => {
 
     const sql = `
       INSERT INTO transaksi_bansos (id_penerima, id_paket, last_pengambilan, next_pengambilan)
-      VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 30 DAY))
+      VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))
     `;
 
     await db.promise().query(sql, [id_penerima, id_paket]);
